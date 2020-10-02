@@ -287,10 +287,11 @@ for i in range(len(df1.index)):
     loc = location[i]
     ss = unique_mail_dict.get(id)
     if ss is None:
-        unique_mail_dict.update({id:1})
+        ss = 1
+        unique_mail_dict.update({id:ss})
     else:
         ss = int(ss) + 1
-        unique_mail_dict.update({id:(ss)})
+        unique_mail_dict.update({id:ss})
     
     region1 = ee.Geometry.Polygon(loads(loc))
 
