@@ -7,7 +7,7 @@
 #
 # Fun to start & stop Crop Monitoring VM instance
 
-import io
+import io, datetime
 import json
 import oci
 
