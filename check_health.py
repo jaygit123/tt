@@ -287,10 +287,13 @@ for i in range(len(df1.index)):
     evi = getReReList(EVI1, ['Date', 'EVI'])
     df = create_df(ndvi,evi)
     andvil1,andviu1,andvin1,sdf1 = predict(df)
-    aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + cnt, id + '_' + cnt)
+    aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(cnt), id + '_' + str(cnt))
     cnt = cnt + 1
 
-status = send_mail.send_email(mail)
+print("Length of mail: " + str(len(mail)))
+print("Length of unique_mail_list: " + str(len(unique_mail_list)))
+unique_mail_list = list(set(mail))
+status = send_mail.send_email(unique_mail_list)
 print("results -----------")
 if status == False:
     print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
