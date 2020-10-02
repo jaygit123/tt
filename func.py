@@ -7,9 +7,10 @@
 #
 # Fun to start & stop Crop Monitoring VM instance
 
-import io
+import io, logging
 import json
 import oci
+from urllib.parse import urlparse, parse_qs
 
 from fdk import response
 
@@ -62,14 +63,25 @@ def handler(ctx, data: io.BytesIO=None):
     command = "invalid"
 
     try:
-        body = json.loads(data.getvalue())
+        # retrieving the request headers
+        headers = ctx.Headers()
+        logging.getLogger().info("Headers: " + json.dumps(headers))
+        token = headers.get("auth_token")
+        logging.getLogger().info(">>> got auth_token from header: " + str(token))
+
+        requesturl = ctx.RequestURL()
+        logging.getLogger().info("Request URL: " + json.dumps(requesturl))
+
+        parsed_url = urlparse(requesturl)
+        query_str = parse_qs(parsed_url.query)
+        logging.getLogger().info("Query string: " + json.dumps(query_str))
+
+        body = json.loads(data.getvalue().decode('UTF-8'))
         logging.getLogger().info(">>> got body: " + str(body))
-        token = body.get("auth_token")
-        logging.getLogger().info(">>> got token: " + str(token))
         instance_ocid = body.get("instance_ocid")
         logging.getLogger().info(">>> got instanceocid: " + str(instance_ocid))
         command = body.get("command")
-        logging.getLogger().info(">>> got command: " + str(command))
+        logging.getLogger().info(">>> got command: " + str(command))        
 
         app_context = dict(ctx.Config())
         apiKey = app_context['auth_token']
