@@ -67,14 +67,15 @@ def handler(ctx, data: io.BytesIO=None):
         headers = ctx.Headers()
         logging.getLogger().info("Headers: " + json.dumps(headers))
         token = headers.get("auth_token")
-        logging.getLogger().info(">>> got auth_token from header: " + str(token))
+        logging.getLogger().info(">>> got auth_token from header str: " + str(token))
+        logging.getLogger().info(">>> got auth_token from header json: " + json.dumps(token))
 
         requesturl = ctx.RequestURL()
-        logging.getLogger().info("Request URL: " + json.dumps(requesturl))
+        logging.getLogger().info("Request URL: " + str(requesturl))
 
         parsed_url = urlparse(requesturl)
         query_str = parse_qs(parsed_url.query)
-        logging.getLogger().info("Query string: " + json.dumps(query_str))
+        logging.getLogger().info("Query string: " + str(query_str))
 
         body = json.loads(data.getvalue().decode('UTF-8'))
         logging.getLogger().info(">>> got body: " + str(body))
