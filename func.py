@@ -79,13 +79,11 @@ def handler(ctx, data: io.BytesIO=None):
         #body = json.loads(data.getvalue().decode('UTF-8'))
         #logging.getLogger().info(">>> got body: " + str(body))
         
-        instance_ocid = query_str.get("instance_ocid")
-        instance_ocid = instance_ocid.replace("['", "")
-        instance_ocid = instance_ocid.replace("']", "")
+        instance_ocid_list = query_str.get("instance_ocid")
+        instance_ocid = instance_ocid_list[0]
         logging.getLogger().info(">>> got instanceocid: " + str(instance_ocid))
-        command = query_str.get("command")
-        command = command.replace("['", "")
-        command = command.replace("']", "")
+        command_list = query_str.get("command")
+        command = command_list[0]
         logging.getLogger().info(">>> got command: " + str(command))        
 
         app_context = dict(ctx.Config())
