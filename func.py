@@ -64,9 +64,13 @@ def handler(ctx, data: io.BytesIO=None):
 
     try:
         body = json.loads(data.getvalue())
+        logging.getLogger().info(">>> got body: " + str(body))
         token = body.get("auth_token")
+        logging.getLogger().info(">>> got token: " + str(token))
         instance_ocid = body.get("instance_ocid")
+        logging.getLogger().info(">>> got instanceocid: " + str(instance_ocid))
         command = body.get("command")
+        logging.getLogger().info(">>> got command: " + str(command))
 
         app_context = dict(ctx.Config())
         apiKey = app_context['auth_token']
