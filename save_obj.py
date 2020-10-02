@@ -2,6 +2,7 @@ import filecmp
 import oci, logging
 from oci.object_storage.models import CreateBucketDetails
 from oci.signer import Signer
+import datetime as DT
 
 import send_mail
 
@@ -33,12 +34,12 @@ def put_object_to_storage(bucket_name, object_name, data_to_write):
         print('ERROR: Saving results data to Object Storage.\n' + str(e))
         return False, str(e)
 
-    print('SUCCESS: Retrieval from Object Storage successful')
-    return True
+    print('SUCCESS: Saving results data to Object Storage successful')
+    return True, "Success"
 
 if __name__ == '__main__':
     BUCKET_NAME = "Bucket-for-crop-health-project"
-    OBJECT_TO_RETRIEVE = 'check_health_status_obj.txt'
+    OBJECT_TO_RETRIEVE = 'check_health_status_obj'+DT.date.today()+'.txt'
     data_to_write = "_nothing_"
     status, e = put_object_to_storage(BUCKET_NAME, OBJECT_TO_RETRIEVE, data_to_write)
     if status == False:
