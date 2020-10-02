@@ -7,7 +7,7 @@
 #
 # Fun to start & stop Crop Monitoring VM instance
 
-import io, datetime
+import io
 import json
 import oci
 
@@ -60,7 +60,6 @@ def handler(ctx, data: io.BytesIO=None):
     token = "invalid"
     apiKey = "invalid"
     command = "invalid"
-    expiresAt = (datetime.datetime.utcnow() + timedelta(seconds=60)).replace(tzinfo=datetime.timezone.utc).astimezone().replace(microsecond=0).isoformat()
 
     try:
         body = json.loads(data.getvalue())
