@@ -18,41 +18,41 @@ def instance_status(compute_client, instance_id):
     return compute_client.get_instance(instance_id).data.lifecycle_state
 
 def instance_start(compute_client, instance_id):
-    print('Starting Instance: {}'.format(instance_id))
+    logging.getLogger().info('Starting Instance: {}'.format(instance_id))
     try:
         if instance_status(compute_client, instance_id) in 'STOPPED':
             try:
                 resp = compute_client.instance_action(instance_id, 'START')
-                print('Start response code: {0}'.format(resp.status))
+                logging.getLogger().info('Start response code: {0}'.format(resp.status))
             except oci.exceptions.ServiceError as e:
-                print('Starting instance failed. {0}' .format(e))
+                logging.getLogger().info('Starting instance failed. {0}' .format(e))
                 raise
         else:
-            print('The instance was in the incorrect state to start' .format(instance_id))
+            logging.getLogger().info('The instance was in the incorrect state to start' .format(instance_id))
             raise
     except oci.exceptions.ServiceError as e:
-        print('Starting instance failed. {0}'.format(e))
+        logging.getLogger().info('Starting instance failed. {0}'.format(e))
         raise
-    print('Started Instance: {}'.format(instance_id))
+    logging.getLogger().info('Started Instance: {}'.format(instance_id))
     return instance_status(compute_client, instance_id)
 
 def instance_stop(compute_client, instance_id):
-    print('Stopping Instance: {}'.format(instance_id))
+    logging.getLogger().info('Stopping Instance: {}'.format(instance_id))
     try:
         if instance_status(compute_client, instance_id) in 'RUNNING':
             try:
                 resp = compute_client.instance_action(instance_id, 'STOP')
-                print('Stop response code: {0}'.format(resp.status))
+                logging.getLogger().info('Stop response code: {0}'.format(resp.status))
             except oci.exceptions.ServiceError as e:
-                print('Stopping instance failed. {0}' .format(e))
+                logging.getLogger().info('Stopping instance failed. {0}' .format(e))
                 raise
         else:
-            print('The instance was in the incorrect state to stop' .format(instance_id))
+            logging.getLogger().info('The instance was in the incorrect state to stop' .format(instance_id))
             raise
     except oci.exceptions.ServiceError as e:
-        print('Stopping instance failed. {0}'.format(e))
+        logging.getLogger().info('Stopping instance failed. {0}'.format(e))
         raise
-    print('Stopped Instance: {}'.format(instance_id))
+    logging.getLogger().info('Stopped Instance: {}'.format(instance_id))
     return instance_status(compute_client, instance_id)
 
 def handler(ctx, data: io.BytesIO=None):
@@ -68,7 +68,6 @@ def handler(ctx, data: io.BytesIO=None):
         logging.getLogger().info("Headers: " + json.dumps(headers))
         token = headers.get("auth_token")
         logging.getLogger().info(">>> got auth_token from header str: " + str(token))
-        logging.getLogger().info(">>> got auth_token from header json: " + json.dumps(token))
 
         requesturl = ctx.RequestURL()
         logging.getLogger().info("Request URL: " + str(requesturl))
@@ -77,11 +76,12 @@ def handler(ctx, data: io.BytesIO=None):
         query_str = parse_qs(parsed_url.query)
         logging.getLogger().info("Query string: " + str(query_str))
 
-        body = json.loads(data.getvalue().decode('UTF-8'))
-        logging.getLogger().info(">>> got body: " + str(body))
-        instance_ocid = body.get("instance_ocid")
+        #body = json.loads(data.getvalue().decode('UTF-8'))
+        #logging.getLogger().info(">>> got body: " + str(body))
+        
+        instance_ocid = query_str.get("instance_ocid")
         logging.getLogger().info(">>> got instanceocid: " + str(instance_ocid))
-        command = body.get("command")
+        command = query_str.get("command")
         logging.getLogger().info(">>> got command: " + str(command))        
 
         app_context = dict(ctx.Config())
@@ -98,9 +98,13 @@ def handler(ctx, data: io.BytesIO=None):
                         )
 
     except (Exception, ValueError) as ex:
-        print("Two arguments along with one header need to be passed to the function: instance_ocid, command and auth_token", flush=True)
-        logging.getLogger().info('Two arguments along with one header need to be passed to the function: instance_ocid, command and auth_token. \n' + str(ex))
-        raise 
+        error = "Two arguments along with one header need to be passed to the function: instance_ocid, command and auth_token"
+        logging.getLogger().info(error + ' \n' + str(ex))
+        return response.Response(
+                        ctx, 
+                        status_code=401, 
+                        response_data=json.dumps({"active": False, "wwwAuthenticate": "AUTH_TOKEN " + error})
+                        )
 
     try:
         signer = oci.auth.signers.get_resource_principals_signer()
@@ -113,7 +117,6 @@ def handler(ctx, data: io.BytesIO=None):
         elif command == 'stop':
             resp = instance_stop(compute_client, instance_ocid)
         else:
-            print("Command not supported", flush=True)
             logging.getLogger().info('Command not supported')
             resp = 'command not supported'
 
@@ -123,8 +126,11 @@ def handler(ctx, data: io.BytesIO=None):
             headers={"Content-Type": "application/json"}
         )
     except (Exception, ValueError) as ex:
-        print("Command execution failed", flush=True)
         logging.getLogger().info('Command execution failed \n' + str(ex))
-        raise 
+        return response.Response(
+                        ctx, 
+                        status_code=401, 
+                        response_data=json.dumps({"active": False, "execution": "Command execution failed"})
+                        ) 
 
 
