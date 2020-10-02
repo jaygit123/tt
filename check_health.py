@@ -258,6 +258,14 @@ def ProcessImg(region,from_date,to_date,clouds_percentage):
         
     return GLOBAL_NDVI,GLOBAL_EVI
 
+def delete_image_files(list_of_mailid):
+    for mailid in list_of_mailid:
+        image_files = glob.glob(mailid + '*.png')
+        print(">>> Got "+str(len(image_files))+" image files for email " + mailid)
+        for img_file in image_files:
+            print("Deleting..." + img_file)
+            os.remove(img_file)
+
 Landsat7_tier1_dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1_SR")
 
 reReArgs = {
@@ -295,6 +303,8 @@ print("Length of mail: " + str(len(mail)))
 print("Length of unique_mail_list: " + str(len(unique_mail_list)))
 status = send_mail.send_email(unique_mail_list)
 print("results -----------")
+print("deleting the .png files")
+delete_image_files(unique_mail_list)
 if status == False:
     print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
     send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
