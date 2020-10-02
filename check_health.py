@@ -1,4 +1,4 @@
-import os
+import os, glob
 import ee
 import geemap
 import ipywidgets as widgets
@@ -258,13 +258,12 @@ def ProcessImg(region,from_date,to_date,clouds_percentage):
         
     return GLOBAL_NDVI,GLOBAL_EVI
 
-def delete_image_files(list_of_mailid):
-    for mailid in list_of_mailid:
-        image_files = glob.glob(mailid + '*.png')
-        print(">>> Got "+str(len(image_files))+" image files for email " + mailid)
-        for img_file in image_files:
-            print("Deleting..." + img_file)
-            os.remove(img_file)
+def delete_image_files():
+    image_files = glob.glob('*.png')
+    print(">>> Got "+str(len(image_files)))
+    for img_file in image_files:
+        print("Deleting..." + img_file)
+        os.remove(img_file)
 
 Landsat7_tier1_dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1_SR")
 
@@ -281,9 +280,16 @@ to_date = date
 from_date = d2.strftime("%Y-%m-%d")
 clouds_percentage = 100
 cnt = 1
+unique_mail_dict = {}
 for i in range(len(df1.index)):
     id = mail[i]
     loc = location[i]
+    ss = unique_mail_dict.get(id)
+    if ss == None:
+        unique_mail_dict.update(id:1)
+    else:
+        ss = int(ss) + 1
+        unique_mail_dict.update(id:(ss))
     
     region1 = ee.Geometry.Polygon(loads(loc))
 
@@ -295,8 +301,8 @@ for i in range(len(df1.index)):
     evi = getReReList(EVI1, ['Date', 'EVI'])
     df = create_df(ndvi,evi)
     andvil1,andviu1,andvin1,sdf1 = predict(df)
-    aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(cnt), id + '_' + str(cnt))
-    cnt = cnt + 1
+    aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(ss), id + '_' + str(ss))
+    #cnt = cnt + 1
 
 unique_mail_list = list(set(mail))
 print("Length of mail: " + str(len(mail)))
@@ -304,7 +310,7 @@ print("Length of unique_mail_list: " + str(len(unique_mail_list)))
 status = send_mail.send_email(unique_mail_list)
 print("results -----------")
 print("deleting the .png files")
-delete_image_files(unique_mail_list)
+delete_image_files()
 if status == False:
     print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
     send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
