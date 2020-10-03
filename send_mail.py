@@ -19,7 +19,7 @@ def write_to_file(prefix, content):
     today_date = str(DT.date.today())
     #print(">>>> " + n)
     #print(">>>> " + today_date)
-    f = open(prefix + "-" + today_date + "-" + n + ".txt", "a")
+    f = open(prefix + "_" + today_date + "_" + n + ".txt", "a")
     f.write(today_date + ": " + content)
     f.close()
 
