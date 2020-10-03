@@ -305,70 +305,70 @@ if __name__ == '__main__':
     NUM_OF_DAYS_TO_CHECK = 7
     status = can_send_notification(NUM_OF_DAYS_TO_CHECK)
 
-    if status == True:
-        print("NOT notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So, can notify now")
-    else:
-        print("Already notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So CANNOT notify now")
-        return
-
-    Landsat7_tier1_dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1_SR")
-
-    reReArgs = {
-    'reducer': ee.Reducer.mean(),
-    'geometry': ee.Geometry.Point([0,0]),
-    'scale': 200}
-
-    x = datetime.datetime.now()
-    date = x.strftime("%Y-%m-%d")
-    d = datetime.datetime.strptime(date, "%Y-%m-%d")
-    d2 = d - dateutil.relativedelta.relativedelta(months=8)
-    to_date = date
-    from_date = d2.strftime("%Y-%m-%d")
-    clouds_percentage = 100
-    unique_mail_dict = {}
-    for i in range(len(df1.index)):
-        id = mail[i]
-        loc = location[i]
-        ss = unique_mail_dict.get(id)
-        if ss is None:
-            ss = 1
-            unique_mail_dict.update({id:ss})
-        else:
-            ss = int(ss) + 1
-            unique_mail_dict.update({id:ss})
-        
-        region1 = ee.Geometry.Polygon(loads(loc))
-
-        bigger_region = region1.buffer(0.1)
-                
-        reReArgs['geometry'] = region1
-        NDVI,EVI1 = ProcessImg(bigger_region,from_date,to_date,clouds_percentage)
-        ndvi = getReReList(NDVI, ['Date', 'NDVI'])
-        evi = getReReList(EVI1, ['Date', 'EVI'])
-        df = create_df(ndvi,evi)
-        andvil1,andviu1,andvin1,sdf1 = predict(df)
-        aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
-
-    print(unique_mail_dict)
-    unique_mail_list = list(set(mail))
-    print("Length of mail: " + str(len(mail)))
-    print("Length of unique_mail_list: " + str(len(unique_mail_list)))
-    status = send_mail.send_email(unique_mail_list)
-    print("results -----------")
-    print("deleting the .png files")
-    delete_image_files()
     if status == False:
-        print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
-        send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
+        print("Already notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So CANNOT notify now")
+        
     else:
-        print(status)
-        send_mail.write_to_file('SUCCESS-EMAIL', str(status))
+        print("NOT notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So, can notify now")
 
-        OBJECT_TO_SAVE = 'check_health_status_obj_'+str(datetime.date.today())+'.txt'
-        status, filename_or_error = save_obj.put_object_to_storage(BUCKET_NAME, OBJECT_TO_SAVE, str(status))
+        Landsat7_tier1_dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1_SR")
+
+        reReArgs = {
+        'reducer': ee.Reducer.mean(),
+        'geometry': ee.Geometry.Point([0,0]),
+        'scale': 200}
+
+        x = datetime.datetime.now()
+        date = x.strftime("%Y-%m-%d")
+        d = datetime.datetime.strptime(date, "%Y-%m-%d")
+        d2 = d - dateutil.relativedelta.relativedelta(months=8)
+        to_date = date
+        from_date = d2.strftime("%Y-%m-%d")
+        clouds_percentage = 100
+        unique_mail_dict = {}
+        for i in range(len(df1.index)):
+            id = mail[i]
+            loc = location[i]
+            ss = unique_mail_dict.get(id)
+            if ss is None:
+                ss = 1
+                unique_mail_dict.update({id:ss})
+            else:
+                ss = int(ss) + 1
+                unique_mail_dict.update({id:ss})
+            
+            region1 = ee.Geometry.Polygon(loads(loc))
+
+            bigger_region = region1.buffer(0.1)
+                    
+            reReArgs['geometry'] = region1
+            NDVI,EVI1 = ProcessImg(bigger_region,from_date,to_date,clouds_percentage)
+            ndvi = getReReList(NDVI, ['Date', 'NDVI'])
+            evi = getReReList(EVI1, ['Date', 'EVI'])
+            df = create_df(ndvi,evi)
+            andvil1,andviu1,andvin1,sdf1 = predict(df)
+            aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+
+        print(unique_mail_dict)
+        unique_mail_list = list(set(mail))
+        print("Length of mail: " + str(len(mail)))
+        print("Length of unique_mail_list: " + str(len(unique_mail_list)))
+        status = send_mail.send_email(unique_mail_list)
+        print("results -----------")
+        print("deleting the .png files")
+        delete_image_files()
         if status == False:
-            print('UNABLE TO SAVE RESULTS OBJECT...could not save results data to Object Storage')
-            send_mail.write_to_file('ERROR-OBJ_STORE_SAVE', filename_or_error)
-            raise Exception(filename_or_error)
+            print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
+            send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
         else:
-            print(status, filename_or_error)
+            print(status)
+            send_mail.write_to_file('SUCCESS-EMAIL', str(status))
+
+            OBJECT_TO_SAVE = 'check_health_status_obj_'+str(datetime.date.today())+'.txt'
+            status, filename_or_error = save_obj.put_object_to_storage(BUCKET_NAME, OBJECT_TO_SAVE, str(status))
+            if status == False:
+                print('UNABLE TO SAVE RESULTS OBJECT...could not save results data to Object Storage')
+                send_mail.write_to_file('ERROR-OBJ_STORE_SAVE', filename_or_error)
+                raise Exception(filename_or_error)
+            else:
+                print(status, filename_or_error)
