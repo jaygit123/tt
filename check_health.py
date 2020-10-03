@@ -34,6 +34,7 @@ np.random.seed(1)
 
 # Retrieve the Object (csv file) containing list of emails from OCI Object storage
 OBJECT_TO_RETRIEVE = 'check_health_file_obj.csv'
+BUCKET_NAME = "Bucket-for-crop-health-project"
 status, filename_or_error = retrieve_obj.retrieve_object(BUCKET_NAME, OBJECT_TO_RETRIEVE)
 if status == False:
     print('UNABLE TO RETRIEVE OBJECT...could not retrieve date from Object Storage')
@@ -121,6 +122,23 @@ def create_seq(X,y,time_steps=1):
 
 def fill_values(df):
     x = random.choice([r1,r2,r3])
+    aug = []
+    for i in range(len(df.index)):
+      if pd.isna(df.at[i,'EVI']):
+        date = df.at[i,'date']
+        month = date.strftime("%B")
+        df.at[i,'EVI'] = random.uniform(x[month]['EVI']['min'],x[month]['EVI']['max'])
+      if pd.isna(df.at[i,'NDVI']):
+        date = df.at[i,'date']
+        month = date.strftime("%B")
+        df.at[i,'NDVI'] = random.uniform(x[month]['NDVI']['min'],x[month]['NDVI']['max'])
+        aug.append(True)
+      else:
+        aug.append(False)
+    df['aug'] = aug
+    return df
+"""
+    x = random.choice([r1,r2,r3])
     for i in range(len(df.index)):
       if pd.isna(df.at[i,'EVI']):
         date = df.at[i,'date']
@@ -131,6 +149,7 @@ def fill_values(df):
         month = date.strftime("%B")
         df.at[i,'NDVI'] = random.uniform(x[month]['NDVI']['min'],x[month]['NDVI']['max'])
     return df
+"""
 
 def create_df(NDVI,EVI):
     NDVI = pd.DataFrame(NDVI)
@@ -153,6 +172,46 @@ def create_df(NDVI,EVI):
     return df
 
 def predict(df):
+
+    X,y = create_seq(df[['NDVI','EVI']],df.NDVI,8)
+    X_pred= model.predict(X)
+    mae_loss = np.abs(X_pred[:,0] - y)
+    
+    ndvi_thresholdn = 0.2
+    ndvi_thresholdl = 0.3
+    ndvi_thresholdu = 0.4
+    
+    score_df = pd.DataFrame(df[8:])
+
+    score_df['loss_NDVI'] = mae_loss
+    
+    score_df['threshold_NDVIn'] = ndvi_thresholdn
+    
+    score_df['threshold_NDVIl'] = ndvi_thresholdl
+    
+    score_df['threshold_NDVIu'] = ndvi_thresholdu
+    
+    score_df['anomaly_NDVIn'] = ((score_df.loss_NDVI > score_df.threshold_NDVIn) & (score_df.loss_NDVI < score_df.threshold_NDVIl) & (score_df.loss_NDVI < score_df.threshold_NDVIu))
+
+    score_df['anomaly_NDVIl'] = ((score_df.loss_NDVI > score_df.threshold_NDVIl) & (score_df.loss_NDVI < score_df.threshold_NDVIu))
+    
+    score_df['anomaly_NDVIu'] = score_df.loss_NDVI > score_df.threshold_NDVIu
+    
+    score_df['NDVI'] = df[8:].NDVI
+    
+    score_df['prediction'] = X_pred[:,0]
+    
+    anomalies_NDVIn = score_df[score_df.anomaly_NDVIn == True]
+    
+    anomalies_NDVIl = score_df[score_df.anomaly_NDVIl == True]
+    
+    anomalies_NDVIu = score_df[score_df.anomaly_NDVIu == True]
+    
+    anomalies_NDVIa = score_df[score_df.aug == True]
+    
+    
+    return anomalies_NDVIl,anomalies_NDVIu,anomalies_NDVIn,anomalies_NDVIa,score_df
+    """
     X,y = create_seq(df[['NDVI','EVI']],df.NDVI,8)
     X_pred= model.predict(X)
     mae_loss = np.abs(X_pred[:,0] - y)
@@ -189,7 +248,20 @@ def predict(df):
     
     
     return anomalies_NDVIl,anomalies_NDVIu,anomalies_NDVIn,score_df
+    """
 
+def aplot(andvil,andviu,andvin,andvia,sdf,farm,name):    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=andvin.date, y=andvin.NDVI,mode='markers',name='Mild anomaly',marker = dict(color = 'rgb(253, 229, 52)',size = 15)))
+    fig.add_trace(go.Scatter(x=andvil.date, y=andvil.NDVI,mode='markers',name='Medium anomaly',marker = dict(color = 'rgb(235, 153, 52)',size = 15)))
+    fig.add_trace(go.Scatter(x=andviu.date, y=andviu.NDVI,mode='markers',name='Severe anomaly',marker = dict(color = 'rgb(235, 52, 52)',size = 15)))
+    fig.add_trace(go.Scatter(x=andvia.date, y=andvia.NDVI,mode='markers',name='Predicted data',marker = dict(color = 'rgb(0, 0, 0)',size = 10)))
+    fig.add_trace(go.Scatter(x=sdf.date, y=sdf.NDVI,mode='lines',name='Health Graph',line = dict(color="#00fc41",width=4)))
+    #fig.update_layout(title="Health Graph",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
+    fig.update_layout(title="Health Graph for "+farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
+    fig.write_image(name+".png")
+    return
+"""
 def aplot(andvil,andviu,andvin,sdf,farm,name):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=andvin.date, y=andvin.NDVI,mode='markers',name='Mild anomaly',marker = dict(color = 'rgb(253, 229, 52)',size = 15)))
@@ -199,6 +271,7 @@ def aplot(andvil,andviu,andvin,sdf,farm,name):
     fig.update_layout(title="Health Graph for "+farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.write_image(name+".png")
     return
+"""
 
 def cloudMaskL457(image):
     qa = image.select('pixel_qa')
@@ -306,10 +379,14 @@ if __name__ == '__main__':
     status = can_send_notification(NUM_OF_DAYS_TO_CHECK)
 
     if status == False:
-        print("Already notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So CANNOT notify now")
+        print("************************\n**************************")
+        print("Already notified in the past "+str(NUM_OF_DAYS_TO_CHECK)+" days. So CANNOT notify now")
+        print("************************\n**************************")
+        print("NOTE: ")
+        print("If required to notify forcefully, edit the NUM_OF_DAYS_TO_CHECK in this script to a value 100 and rerun this script")
         
     else:
-        print("NOT notified in the past "+NUM_OF_DAYS_TO_CHECK+" days. So, can notify now")
+        print("NOT notified in the past "+str(NUM_OF_DAYS_TO_CHECK)+" days. So, can notify now")
 
         Landsat7_tier1_dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1_SR")
 
@@ -317,7 +394,40 @@ if __name__ == '__main__':
         'reducer': ee.Reducer.mean(),
         'geometry': ee.Geometry.Point([0,0]),
         'scale': 200}
+        
+        x = datetime.datetime.now()
+        date = x.strftime("%Y-%m")
+        d = datetime.datetime.strptime(date, "%Y-%m")
+        d2 = d - dateutil.relativedelta.relativedelta(months=8)
+        to_date = date+"-"+"01"
+        from_date = d2.strftime("%Y-%m-%d")
+        clouds_percentage = 100
+        unique_mail_dict = {}
+        for i in range(len(df1.index)):
+            id = mail[i]
+            loc = location[i]
+            ss = unique_mail_dict.get(id)
+            if ss is None:
+                ss = 1
+                unique_mail_dict.update({id:ss})
+            else:
+                ss = int(ss) + 1
+                unique_mail_dict.update({id:ss})
+            
+            region1 = ee.Geometry.Polygon(loads(loc))
 
+            bigger_region = region1.buffer(0.1)
+                    
+            reReArgs['geometry'] = region1
+            NDVI,EVI1 = ProcessImg(bigger_region,from_date,to_date,clouds_percentage)
+            ndvi = getReReList(NDVI, ['Date', 'NDVI'])
+            evi = getReReList(EVI1, ['Date', 'EVI'])
+            df = create_df(ndvi,evi)
+            andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df)
+            #aplot(andvil1,andviu1,andvin1,andvia1,sdf1,' Custom Region',id)
+            aplot(andvil1, andviu1, andvin1, andvia1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+
+        """
         x = datetime.datetime.now()
         date = x.strftime("%Y-%m-%d")
         d = datetime.datetime.strptime(date, "%Y-%m-%d")
@@ -348,6 +458,7 @@ if __name__ == '__main__':
             df = create_df(ndvi,evi)
             andvil1,andviu1,andvin1,sdf1 = predict(df)
             aplot(andvil1, andviu1, andvin1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+        """
 
         print(unique_mail_dict)
         unique_mail_list = list(set(mail))
