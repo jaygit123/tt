@@ -47,7 +47,7 @@ def send_email(mail_contents):
             fromDate = DT.date.today()
             toDate = fromDate - DT.timedelta(days=7)
             subject = "Crop Health for the week " + str(toDate) + " to " + str(fromDate)
-            body = "Hello there, \n\nWe hope you are doing well.\nPlease find attached your weekly Crop Health for the week " \
+            body = "Hello there, \n\nWe hope you are doing well.\nThis email is regarding your weekly Crop Health for the week " \
                             + str(toDate) + " to " + str(fromDate) + "."
             
             #print("subject: " + subject) 
@@ -81,7 +81,7 @@ def send_email(mail_contents):
                     body =  body + "\n\nNOTE: The attached graph has health status for current and previous month." 
             else:
                 print("No images for this email...so, not attaching anything.")
-                body = body + '\n\nNOTE: Satellite images are unavailable or unusable. Cannot show health graph.'
+                body = body + '\n\nNOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
             body =  body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
                             + "\n\nVisit us: https://DeepVisionTech.AI" \
