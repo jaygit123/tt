@@ -46,7 +46,7 @@ else:
 df1 = pd.read_csv(filename_or_error)
 location = list(df1['location'])
 mail = list(df1['mail id'])
-farmname = list(df1['farm_name'])
+farm_name = list(df1['farm_name'])
 threshold = list(df1['threshold'])
 Map = geemap.Map()
 
@@ -344,7 +344,12 @@ if __name__ == '__main__':
         'geometry': ee.Geometry.Point([0,0]),
         'scale': 200}
 
-        x = datetime.datetime.now()
+        # NOTE: THIS IS FOR TESTING ONLY. Need to Comment out
+        date_input = datetime.datetime.strptime("2020-09-04", '%Y-%m-%d')
+        date_input = date_notified.date()
+
+        x = date_input
+        #x = datetime.datetime.now()
         date = x.strftime("%Y-%m")
         d = datetime.datetime.strptime(date, "%Y-%m")
         d2 = d - dateutil.relativedelta.relativedelta(months=2)
@@ -353,12 +358,8 @@ if __name__ == '__main__':
         clouds_percentage = 100
         unique_mail_dict = {}
 
-     
-    
-
-
         for i in range(len(df1.index)):
-            id = mail[i]
+            id = (mail[i]).lower()
             loc = location[i]
             trshld = threshold[i] 
             nme = farm_name[i]
@@ -386,7 +387,7 @@ if __name__ == '__main__':
             elif (st == "40p"):
                 bplot(df,id,nme)
             elif (st == "lm"):
-                print("No data is available for current month for "+nme)
+                print("No data is available for current month for "+ str(nme))
                 continue
 
         print(unique_mail_dict)
