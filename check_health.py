@@ -137,7 +137,19 @@ def fill_values(df):
       else:
         aug.append(False)
     df['aug'] = aug
-    return df
+    st = chkim(aug)
+    return df,st
+
+def chkim(aug):
+    ln = len(aug)
+    x = aug.count(True)
+    pr = (0.40 * ln)
+    if ((x >= int(round(pr))) and ( aug[-1] != True)):
+        return("40p")
+    elif (aug[-1] == True):
+        return("lm")
+    else:
+        return("l40p")
 
 def create_df(NDVI,EVI):
     NDVI = pd.DataFrame(NDVI)
@@ -156,8 +168,13 @@ def create_df(NDVI,EVI):
     df = df.infer_objects()
     df = df.reset_index()
     df = df.rename(columns={"index":"date"})
-    df = fill_values(df)
-    return df
+    df,st = fill_values(df)
+    if (st == "40p"):
+        df2 = pd.DataFrame(df[8:])
+        df3 = df2[df2.aug==False]
+        return df3,st
+    else:
+        return df,st
 
 def predict(df,threshold):
     X,y = create_seq(df[['NDVI','EVI']],df.NDVI,8)
@@ -193,6 +210,14 @@ def aplot(andvil,andviu,andvin,andvia,sdf,farm,name):
     fig.add_trace(go.Scatter(x=sdf.date, y=sdf.NDVI,mode='lines',name='Health Graph',line = dict(color="#00fc41",width=4)))
     #fig.update_layout(title="Health Graph",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.update_layout(title="Health Graph for "+farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
+    fig.write_image(name+".png")
+    return
+
+def bplot(df,name,nme):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.date, y=df.NDVI,mode='markers',name='Halth value',marker = dict(color = 'rgb(0, 0, 0)',size = 15)))
+    fig.update_layout(title="Health Graph for "+nme+" (Not assessed for abnormalities)",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
+    fig.show()
     fig.write_image(name+".png")
     return
 
@@ -322,16 +347,21 @@ if __name__ == '__main__':
         x = datetime.datetime.now()
         date = x.strftime("%Y-%m")
         d = datetime.datetime.strptime(date, "%Y-%m")
-        d2 = d - dateutil.relativedelta.relativedelta(months=8)
+        d2 = d - dateutil.relativedelta.relativedelta(months=2)
         to_date = date+"-"+"01"
         from_date = d2.strftime("%Y-%m-%d")
         clouds_percentage = 100
         unique_mail_dict = {}
 
+     
+    
+
+
         for i in range(len(df1.index)):
             id = mail[i]
             loc = location[i]
             trshld = threshold[i] 
+            nme = farm_name[i]
             ss = unique_mail_dict.get(id)
             if ss is None:
                 ss = 1
@@ -348,9 +378,16 @@ if __name__ == '__main__':
             NDVI,EVI1 = ProcessImg(bigger_region,from_date,to_date,clouds_percentage)
             ndvi = getReReList(NDVI, ['Date', 'NDVI'])
             evi = getReReList(EVI1, ['Date', 'EVI'])
-            df = create_df(ndvi,evi)
-            andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-            aplot(andvil1, andviu1, andvin1, andvia1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+            df,st = create_df(ndvi,evi)
+
+            if (st == "l40p"):
+                andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
+                aplot(andvil1, andviu1, andvin1, andvia1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+            elif (st == "40p"):
+                bplot(df,id,nme)
+            elif (st == "lm"):
+                print("No data is available for current month for "+nme)
+                continue
 
         print(unique_mail_dict)
         unique_mail_list = list(set(mail))
