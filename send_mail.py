@@ -23,7 +23,7 @@ def write_to_file(prefix, content):
     f.write(today_date + ": " + content)
     f.close()
 
-def send_email(mail_contents):
+def send_email(mail_contents, unique_mail_farm_dict):
     try:
         smtp_username, smtp_password = get_cred()
     except Exception as ex:
@@ -83,10 +83,9 @@ def send_email(mail_contents):
                 print("No images for this email...so, not attaching anything.")
                 body = body + '\n\nNOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
-            body =  body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
-                            + "\n\nVisit us: https://DeepVisionTech.AI" \
+            body = getBodyContent(body, unique_mail_farm_dict)
 
-            msg.attach(MIMEText(body, 'plain'))
+            msg.attach(MIMEText(body, 'html'))
 
         except Exception as ex:
             print("ERROR in attaching images to email: ", ex, flush=True)
@@ -118,6 +117,19 @@ def send_email(mail_contents):
 
     return STATUS
 
+def getBodyContent(body, unique_mail_farm_dict): 
+
+    URL_TO_INVOKE_FN = ""
+    body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
+                    + "\n\nVisit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
+                    + "\n\nClick to stop receiving email notification for: " \
+                    + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
+                    
+    for mail in unique_mail_farm_dict:
+        link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+unique_mail_farm_dict.get(mail)
+        body = doby + " | <a href='"+link+"'>"+unique_mail_farm_dict.get(mail)+"</a>"
+
+    return body
 
 def get_cred():
     cred_filename = 'CredFile.ini'
