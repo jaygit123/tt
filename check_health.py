@@ -142,14 +142,17 @@ def fill_values(df):
 
 def chkim(aug):
     ln = len(aug)
-    x = aug.count(True)
-    pr = (0.40 * ln)
-    if ((x >= int(round(pr))) and ( aug[-1] != True)):
-        return("40p")
-    elif (aug[-1] == True):
-        return("lm")
-    else:
+    if ln == 0:
         return("l40p")
+    else:
+        x = aug.count(True)
+        pr = (0.40 * ln)
+        if (aug[-1] == True):
+            return("lm")
+        elif (x >= int(round(pr))):
+            return("40p")
+        else:
+            return("l40p")
 
 def create_df(NDVI,EVI):
     NDVI = pd.DataFrame(NDVI)
@@ -163,7 +166,7 @@ def create_df(NDVI,EVI):
     EVI['Date'] = pd.to_datetime(EVI['Date'])
     EVI = EVI.set_index('Date')
     df = pd.concat([NDVI,EVI],axis=1)
-    dates = pd.date_range(start=(datetime.datetime.strptime(from_date, "%Y-%m-%d") - dateutil.relativedelta.relativedelta(months=8)).strftime("%Y-%m-%d"),end=(to_date),freq='MS')
+    dates = pd.date_range(start=(from_date),end=(to_date),freq='MS')
     df = df.reindex(dates)
     df = df.infer_objects()
     df = df.reset_index()
@@ -346,17 +349,21 @@ if __name__ == '__main__':
 
         # NOTE: THIS IS FOR TESTING ONLY. Need to Comment out
         date_input = datetime.datetime.strptime("2020-09-04", '%Y-%m-%d')
-        date_input = date_notified.date()
+        date_input = date_input.date()
 
         x = date_input
         #x = datetime.datetime.now()
-        date = x.strftime("%Y-%m")
-        d = datetime.datetime.strptime(date, "%Y-%m")
-        d2 = d - dateutil.relativedelta.relativedelta(months=2)
-        to_date = date+"-"+"01"
-        from_date = d2.strftime("%Y-%m-%d")
+        date = x.strftime("%Y-%m-%d")
+        d = datetime.datetime.strptime(date, "%Y-%m-%d")
+        d2 = d - dateutil.relativedelta.relativedelta(months=10)
+        to_date = date
+        from_date = d2.strftime("%Y-%m")+"-01"
+        
+        print(from_date)
+        print(to_date)
         clouds_percentage = 100
         unique_mail_dict = {}
+
 
         for i in range(len(df1.index)):
             id = (mail[i]).lower()
