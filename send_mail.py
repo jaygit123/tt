@@ -98,8 +98,10 @@ def send_email(mail_contents, unique_mail_farm_dict):
 
                 body =  body + "<br><br>Attached graph(s) show health status of all the monitored farms for current and previous month." 
                 
+                print(len(farms_list_copy))
                 if len(farms_list_copy) > 0:
-                    body =  body + "<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph for these farms: "
+                    print("## one or more farms did not have images...adding their name")
+                    body =  body + "<br><br>NOTE: Satellite images for these farms are unavailable or unusable. So, health graphs are not attached for these farms: "
                     fff = ""
                     for kk in farms_list_copy:
                         fff = fff + str(kk) + ", "
@@ -108,7 +110,8 @@ def send_email(mail_contents, unique_mail_farm_dict):
                 print("No images for this email...so, not attaching anything.")
                 body = body + '<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
-            body = body + getBodyContent(body, mail_con, farms_list)
+            body = getBodyContent(body, mail_con, farms_list)
+            print('after calling getBodyContent(): ' + body)
 
             msg.attach(MIMEText(body, 'html'))
 
@@ -147,12 +150,15 @@ def getBodyContent(body, mail, farms_list):
     URL_TO_INVOKE_FN = ""
     body = body + "<br><br>Thanks & Regards,<br>Team DeepVisionTech.AI" \
                     + "<br><br>Visit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
-                    + "<br><br>Click to stop receiving email notification for: " \
+                    + "<br><br>Click here to unsunscribe from email notifications: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
                     
+    links = ""
     for frm in farms_list:
         link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+frm
-        body = body + " | <a href='"+link+"'>"+frm+"</a>"
+        links = links + " | <a href='"+link+"'>"+frm+"</a>"
+
+    body = body + links
 
     return body
 
