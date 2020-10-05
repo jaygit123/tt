@@ -83,7 +83,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
                 print("No images for this email...so, not attaching anything.")
                 body = body + '\n\nNOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
-            body = getBodyContent(body, unique_mail_farm_dict)
+            body = getBodyContent(body, mail_con, unique_mail_farm_dict.get(mail_con))
 
             msg.attach(MIMEText(body, 'html'))
 
@@ -117,7 +117,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
 
     return STATUS
 
-def getBodyContent(body, unique_mail_farm_dict): 
+def getBodyContent(body, mail, farms_list): 
 
     URL_TO_INVOKE_FN = ""
     body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
@@ -125,9 +125,9 @@ def getBodyContent(body, unique_mail_farm_dict):
                     + "\n\nClick to stop receiving email notification for: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
                     
-    for mail in unique_mail_farm_dict:
-        link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+unique_mail_farm_dict.get(mail)
-        body = doby + " | <a href='"+link+"'>"+unique_mail_farm_dict.get(mail)+"</a>"
+    for frm in farms_list:
+        link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+frm
+        body = doby + " | <a href='"+link+"'>"+frm+"</a>"
 
     return body
 
