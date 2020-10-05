@@ -363,6 +363,7 @@ if __name__ == '__main__':
         print(to_date)
         clouds_percentage = 100
         unique_mail_dict = {}
+        unique_mail_farm_dict = {}
 
 
         for i in range(len(df1.index)):
@@ -378,6 +379,15 @@ if __name__ == '__main__':
                 ss = int(ss) + 1
                 unique_mail_dict.update({id:ss})
             
+            frm_nm_list = unique_mail_farm_dict.get(id)
+            if (frm_nm_list is None):
+                frm_nm_list = []
+                frm_nm_list.append(nme)
+                unique_mail_farm_dict.update({id:frm_nm_list})
+            else:
+                frm_nm_list.append(nme)
+                unique_mail_farm_dict.update({id:frm_nm_list})
+
             region1 = ee.Geometry.Polygon(loads(loc))
 
             bigger_region = region1.buffer(0.1)
@@ -398,6 +408,7 @@ if __name__ == '__main__':
                 continue
 
         print(unique_mail_dict)
+        print(unique_mail_farm_dict)
         unique_mail_list = list(set(mail))
         print("Length of mail: " + str(len(mail)))
         print("Length of unique_mail_list: " + str(len(unique_mail_list)))
