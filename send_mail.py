@@ -79,7 +79,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
                     print("Farm name in file: " + frm_in_ffile)
                     
                     if frm_in_ffile in farms_list_copy:
-                        print(">>>>>>>> attachment for this farm is available" + frm_in_ffile)
+                        #print(">>>>>>>> attachment for this farm is available" + frm_in_ffile)
 
                         attachment = open("./" + os.path.basename(img_file), "rb") 
                     
@@ -90,8 +90,8 @@ def send_email(mail_contents, unique_mail_farm_dict):
                         msg.attach(p) 
                         farms_list_copy.remove(frm_in_ffile)
 
-                    else:
-                        print(">>>>>>>> NO attachment for this farm is available" + frm_in_ffile)
+                    #else:
+                        #print(">>>>>>>> NO attachment for this farm is available" + frm_in_ffile)
                     
                     
                     cnt = cnt + 1
@@ -100,18 +100,20 @@ def send_email(mail_contents, unique_mail_farm_dict):
                 
                 print(len(farms_list_copy))
                 if len(farms_list_copy) > 0:
-                    print("## one or more farms did not have images...adding their name")
                     body =  body + "<br><br>NOTE: Satellite images for these farms are unavailable or unusable. So, health graphs are not attached for these farms: "
                     fff = ""
                     for kk in farms_list_copy:
+                        print("## one or more farms did not have images...adding their name: " + str(kk))
                         fff = fff + str(kk) + ", "
+                    body = body + fff
 
             else:
                 print("No images for this email...so, not attaching anything.")
                 body = body + '<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
+            print("len(farms_list): " str(len(farms_list)))
             body = getBodyContent(body, mail_con, farms_list)
-            print('after calling getBodyContent(): ' + body)
+            #print('after calling getBodyContent(): ' + body)
 
             msg.attach(MIMEText(body, 'html'))
 
@@ -148,9 +150,8 @@ def send_email(mail_contents, unique_mail_farm_dict):
 def getBodyContent(body, mail, farms_list): 
 
     URL_TO_INVOKE_FN = ""
-    body = body + "<br><br>Thanks & Regards,<br>Team DeepVisionTech.AI" \
-                    + "<br><br>Visit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
-                    + "<br><br>Click here to unsunscribe from email notifications: " \
+    body = body + "<br><br>Thanks & Regards,<br>Team <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
+                    + "<br><br>Click here to unsubscribe from email notifications: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
                     
     links = ""
