@@ -48,7 +48,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
             fromDate = DT.date.today()
             toDate = fromDate - DT.timedelta(days=7)
             subject = "Crop Health for the week " + str(toDate) + " to " + str(fromDate)
-            body = "Hello there, \n\nWe hope you are doing well.\nThis email is regarding your weekly Crop Health for the week " \
+            body = "Hello there, <br><br>We hope you are doing well.<br>This email is regarding your weekly Crop Health for the week " \
                             + str(toDate) + " to " + str(fromDate) + "."
             
             #print("subject: " + subject) 
@@ -71,12 +71,14 @@ def send_email(mail_contents, unique_mail_farm_dict):
             print(">>> Got "+str(len(files_for_email))+" image files for email " + recipient)
             cnt = 0
             if len(files_for_email) > 0:
+                farms_list_copy = farms_list
                 for img_file in files_for_email:
                     ffile = os.path.basename(img_file)
                     print("FILE: " + ffile)
                     frm_in_ffile = ffile[ffile.find('_')+1 : ffile.find('.png')]
                     print("Farm name in file: " + frm_in_ffile)
-                    if frm_in_ffile in farms_list:
+                    
+                    if frm_in_ffile in farms_list_copy:
                         print(">>>>>>>> attachment for this farm is available" + frm_in_ffile)
 
                         attachment = open("./" + os.path.basename(img_file), "rb") 
@@ -86,6 +88,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
                         encoders.encode_base64(p) 
                         p.add_header('Content-Disposition', "attachment; filename=" + os.path.basename(img_file)) 
                         msg.attach(p) 
+                        farms_list_copy.remove(frm_in_ffile)
 
                     else:
                         print(">>>>>>>> NO attachment for this farm is available" + frm_in_ffile)
@@ -93,10 +96,17 @@ def send_email(mail_contents, unique_mail_farm_dict):
                     
                     cnt = cnt + 1
 
-                body =  body + "\n\nNOTE: Attached graph(s) show health status of all the monitored farms for current and previous month." 
+                body =  body + "<br><br>Attached graph(s) show health status of all the monitored farms for current and previous month." 
+                
+                if len(farms_list_copy) > 0:
+                    body =  body + "<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph for these farms: "
+                    fff = ""
+                    for kk in farms_list_copy:
+                        fff = fff + str(kk) + ", "
+
             else:
                 print("No images for this email...so, not attaching anything.")
-                body = body + '\n\nNOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
+                body = body + '<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
             body = body + getBodyContent(body, mail_con, farms_list)
 
@@ -135,9 +145,9 @@ def send_email(mail_contents, unique_mail_farm_dict):
 def getBodyContent(body, mail, farms_list): 
 
     URL_TO_INVOKE_FN = ""
-    body = body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
-                    + "\n\nVisit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
-                    + "\n\nClick to stop receiving email notification for: " \
+    body = body + "<br><br>Thanks & Regards,<br>Team DeepVisionTech.AI" \
+                    + "<br><br>Visit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
+                    + "<br><br>Click to stop receiving email notification for: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
                     
     for frm in farms_list:
