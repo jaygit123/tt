@@ -348,7 +348,7 @@ if __name__ == '__main__':
         'scale': 200}
 
         # NOTE: THIS IS FOR TESTING ONLY. Need to Comment out
-        date_input = datetime.datetime.strptime("2020-09-04", '%Y-%m-%d')
+        date_input = datetime.datetime.strptime("2019-09-04", '%Y-%m-%d')
         date_input = date_input.date()
 
         x = date_input
@@ -400,7 +400,7 @@ if __name__ == '__main__':
 
             if (st == "l40p"):
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1, andviu1, andvin1, andvia1, sdf1, 'Farm ' + str(farmname[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
+                aplot(andvil1, andviu1, andvin1, andvia1, sdf1, 'Farm ' + str(farm_name[i]) + "(" + str(ss) + ")", id + '_' + str(ss))
             elif (st == "40p"):
                 bplot(df,id,nme)
             elif (st == "lm"):
@@ -412,7 +412,7 @@ if __name__ == '__main__':
         unique_mail_list = list(set(mail))
         print("Length of mail: " + str(len(mail)))
         print("Length of unique_mail_list: " + str(len(unique_mail_list)))
-        status = send_mail.send_email(unique_mail_list)
+        status = send_mail.send_email(unique_mail_list, unique_mail_farm_dict)
         print("results -----------")
         print("deleting the .png files")
         delete_image_files()
