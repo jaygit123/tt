@@ -42,6 +42,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
         success_flag1 = success_flag2 = success_flag3 = True
         #recipient = mail_con['recipient']
         recipient = mail_con
+        farms_list = unique_mail_farm_dict.get(mail_con)
 
         try:
             fromDate = DT.date.today()
@@ -68,22 +69,36 @@ def send_email(mail_contents, unique_mail_farm_dict):
             #filename = recipient + ".png"
             files_for_email = glob.glob(recipient + '*.png')
             print(">>> Got "+str(len(files_for_email))+" image files for email " + recipient)
+            cnt = 0
             if len(files_for_email) > 0:
                 for img_file in files_for_email:
-                    print("FILE: " + os.path.basename(img_file))
-                    attachment = open("./" + os.path.basename(img_file), "rb") 
-                    p = MIMEBase('application', 'octet-stream') 
-                    p.set_payload((attachment).read()) 
-                    encoders.encode_base64(p) 
-                    p.add_header('Content-Disposition', "attachment; filename=" + os.path.basename(img_file)) 
-                    msg.attach(p) 
+                    ffile = os.path.basename(img_file)
+                    print("FILE: " + ffile)
+                    frm_in_ffile = ffile[ffile.find('_')+1 : ffile.find('.png')]
+                    print("Farm name in file: " + frm_in_ffile)
+                    if frm_in_ffile in farms_list:
+                        print(">>>>>>>> attachment for this farm is available" + frm_in_ffile)
 
-                    body =  body + "\n\nNOTE: The attached graph has health status for current and previous month." 
+                        attachment = open("./" + os.path.basename(img_file), "rb") 
+                    
+                        p = MIMEBase('application', 'octet-stream') 
+                        p.set_payload((attachment).read()) 
+                        encoders.encode_base64(p) 
+                        p.add_header('Content-Disposition', "attachment; filename=" + os.path.basename(img_file)) 
+                        msg.attach(p) 
+
+                    else:
+                        print(">>>>>>>> NO attachment for this farm is available" + frm_in_ffile)
+                    
+                    
+                    cnt = cnt + 1
+
+                body =  body + "\n\nNOTE: Attached graph(s) show health status of all the monitored farms for current and previous month." 
             else:
                 print("No images for this email...so, not attaching anything.")
                 body = body + '\n\nNOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
-            body = getBodyContent(body, mail_con, unique_mail_farm_dict.get(mail_con))
+            body = body + getBodyContent(body, mail_con, farms_list)
 
             msg.attach(MIMEText(body, 'html'))
 
@@ -120,14 +135,14 @@ def send_email(mail_contents, unique_mail_farm_dict):
 def getBodyContent(body, mail, farms_list): 
 
     URL_TO_INVOKE_FN = ""
-    body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
+    body = body + "\n\nThanks & Regards,\nTeam DeepVisionTech.AI" \
                     + "\n\nVisit us: <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
                     + "\n\nClick to stop receiving email notification for: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
                     
     for frm in farms_list:
         link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+frm
-        body = doby + " | <a href='"+link+"'>"+frm+"</a>"
+        body = body + " | <a href='"+link+"'>"+frm+"</a>"
 
     return body
 
