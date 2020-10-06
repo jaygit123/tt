@@ -71,7 +71,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
             print(">>> Got "+str(len(files_for_email))+" image files for email " + recipient)
             cnt = 0
             if len(files_for_email) > 0:
-                farms_list_copy = farms_list
+                farms_list_copy = farms_list.copy()
                 for img_file in files_for_email:
                     ffile = os.path.basename(img_file)
                     print("FILE: " + ffile)
@@ -100,7 +100,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
                 
                 print(len(farms_list_copy))
                 if len(farms_list_copy) > 0:
-                    body =  body + "<br><br>NOTE: Satellite images for these farms are unavailable or unusable. So, health graphs are not attached for these farms: "
+                    body =  body + "<br>NOTE: Satellite images for few farms are unavailable or unusable. So, health graphs are not attached for these farms: "
                     fff = ""
                     for kk in farms_list_copy:
                         print("## one or more farms did not have images...adding their name: " + str(kk))
@@ -111,7 +111,7 @@ def send_email(mail_contents, unique_mail_farm_dict):
                 print("No images for this email...so, not attaching anything.")
                 body = body + '<br><br>NOTE: Satellite images are unavailable or unusable. So, we are unable to show health graph.'
 
-            print("len(farms_list): " str(len(farms_list)))
+            print("len(farms_list): " + str(len(farms_list)))
             body = getBodyContent(body, mail_con, farms_list)
             #print('after calling getBodyContent(): ' + body)
 
@@ -149,14 +149,14 @@ def send_email(mail_contents, unique_mail_farm_dict):
 
 def getBodyContent(body, mail, farms_list): 
 
-    URL_TO_INVOKE_FN = ""
+    URL_TO_INVOKE_FN = "https://ackamrxc4anoos3auilnhwzt2q.apigateway.us-ashburn-1.oci.customer-oci.com/delsub/delsub"
     body = body + "<br><br>Thanks & Regards,<br>Team <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
                     + "<br><br>Click here to unsubscribe from email notifications: " \
-                    + "<a href='"+URL_TO_INVOKE_FN+"?email=all&farm_name=all'>All farms</a>"
+                    + "<a href='"+URL_TO_INVOKE_FN+"?mail="+mail+"&farm=all'>All farms</a>"
                     
     links = ""
     for frm in farms_list:
-        link = URL_TO_INVOKE_FN + "?email="+mail+"&farm_name="+frm
+        link = URL_TO_INVOKE_FN + "?mail="+mail+"&farm="+frm
         links = links + " | <a href='"+link+"'>"+frm+"</a>"
 
     body = body + links
