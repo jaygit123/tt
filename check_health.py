@@ -417,27 +417,27 @@ if __name__ == '__main__':
                 print("No data is available for current month for "+nme)
                 continue
 
-            print(unique_mail_dict)
-            print(unique_mail_farm_dict)
-            unique_mail_list = list(set(mail))
-            print("Length of mail: " + str(len(mail)))
-            print("Length of unique_mail_list: " + str(len(unique_mail_list)))
-            status = send_mail.send_email(unique_mail_list, unique_mail_farm_dict)
-            print("results -----------")
-            print("deleting the .png files")
-            delete_image_files()
-            if status == False:
-                print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
-                send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
-            else:
-                print(status)
-                send_mail.write_to_file('SUCCESS-EMAIL', str(status))
+        print(unique_mail_dict)
+        print(unique_mail_farm_dict)
+        unique_mail_list = list(set(mail))
+        print("Length of mail: " + str(len(mail)))
+        print("Length of unique_mail_list: " + str(len(unique_mail_list)))
+        status = send_mail.send_email(unique_mail_list, unique_mail_farm_dict)
+        print("results -----------")
+        print("deleting the .png files")
+        delete_image_files()
+        if status == False:
+            print('UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
+            send_mail.write_to_file('ERROR-EMAIL', 'UNABLE TO SEND EMAILs...could not retrieve SMTP server details')
+        else:
+            print(status)
+            send_mail.write_to_file('SUCCESS-EMAIL', str(status))
 
-                OBJECT_TO_SAVE = 'check_health_status_obj_'+str(datetime.date.today())+'.txt'
-                status, filename_or_error = save_obj.put_object_to_storage(BUCKET_NAME, OBJECT_TO_SAVE, str(status))
-                if status == False:
-                    print('UNABLE TO SAVE RESULTS OBJECT...could not save results data to Object Storage')
-                    send_mail.write_to_file('ERROR-OBJ_STORE_SAVE', filename_or_error)
-                    raise Exception(filename_or_error)
-                else:
-                    print(status, filename_or_error)
+            OBJECT_TO_SAVE = 'check_health_status_obj_'+str(datetime.date.today())+'.txt'
+            status, filename_or_error = save_obj.put_object_to_storage(BUCKET_NAME, OBJECT_TO_SAVE, str(status))
+            if status == False:
+                print('UNABLE TO SAVE RESULTS OBJECT...could not save results data to Object Storage')
+                send_mail.write_to_file('ERROR-OBJ_STORE_SAVE', filename_or_error)
+                raise Exception(filename_or_error)
+            else:
+                print(status, filename_or_error)
