@@ -1,4 +1,4 @@
-import os
+import os, glob
 import ee
 import geemap
 import ipywidgets as widgets
@@ -360,22 +360,44 @@ if __name__ == '__main__':
         'scale': 200}
 
         # NOTE: THIS IS FOR TESTING ONLY. Need to Comment out
-        #date_input = datetime.datetime.strptime("2019-09-30", '%Y-%m-%d')
-        #date_input = date_input.date()
-        #x = date_input
+        date_input = datetime.datetime.strptime("2019-09-30", '%Y-%m-%d')
+        date_input = date_input.date()
+        x = date_input
 
-        x = datetime.datetime.now()
+        #x = datetime.datetime.now()
         date = x.strftime("%Y-%m-%d")
         d = datetime.datetime.strptime(date, "%Y-%m-%d")
         d2 = d - dateutil.relativedelta.relativedelta(months=10)
         from_date = d2.strftime("%Y-%m")+"-01"
         to_date = date
+
+        print(from_date)
+        print(to_date)
         clouds_percentage = 100
+        unique_mail_dict = {}
+        unique_mail_farm_dict = {}
+
         for i in range(len(df1.index)):
             id = mail[i]
             loc = location[i]
             trshld = threshold[i]
-            nme = farm_name[i] 
+            nme = farm_name[i]
+            ss = unique_mail_dict.get(id)
+            if ss is None:
+                ss = 1
+                unique_mail_dict.update({id:ss})
+            else:
+                ss = int(ss) + 1
+                unique_mail_dict.update({id:ss})
+
+            frm_nm_list = unique_mail_farm_dict.get(id)
+            if (frm_nm_list is None):
+                frm_nm_list = []
+                frm_nm_list.append(nme)
+                unique_mail_farm_dict.update({id:frm_nm_list})
+            else:
+                frm_nm_list.append(nme)
+                unique_mail_farm_dict.update({id:frm_nm_list})
             
             region1 = ee.Geometry.Polygon(loads(loc))
 
