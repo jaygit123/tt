@@ -175,7 +175,7 @@ def create_df(NDVI,EVI):
 
 def predict(df,threshold):
     X,y = create_seq(df[['NDVI','EVI']],df.NDVI,8)
-    print(X)
+    #print(X)
     X_pred= model.predict(X)
     mae_loss = np.abs(X_pred[:,0] - y)
     
@@ -210,7 +210,6 @@ def predict(df,threshold):
     anomalies_NDVIu = score_df[score_df.anomaly_NDVIu == True]
     
     anomalies_NDVIa = score_df[score_df.aug == True]
-    
     
     return anomalies_NDVIl,anomalies_NDVIu,anomalies_NDVIn,anomalies_NDVIa,score_df
 
@@ -412,7 +411,9 @@ if __name__ == '__main__':
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
                 aplot(andvil1,andviu1,andvin1,andvia1,sdf1,' Custom Region',id)
             elif (st == "40p"):
-                bplot(df,id,nme)
+                #bplot(df,id,nme)
+                andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1,' Custom Region',id)
             elif (st == "lm"):
                 print("No data is available for current month for "+nme)
                 continue
