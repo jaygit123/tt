@@ -405,21 +405,21 @@ if __name__ == '__main__':
             bigger_region = region1.buffer(0.1)
                     
             reReArgs['geometry'] = region1
-            print(">>>>calling ProcessImg()")
+            #print(">>>>calling ProcessImg()")
             NDVI,EVI1 = ProcessImg(bigger_region,from_date,to_date,clouds_percentage)
-            print(">>> returned from ProcessImg")
+            #print(">>> returned from ProcessImg")
             ndvi = getReReList(NDVI, ['Date', 'NDVI'])
             evi = getReReList(EVI1, ['Date', 'EVI'])
             df,st = create_df(ndvi,evi)
             if (st == "l40p"):
                 print(">>>>>> LESS THAN 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, 'Farm ' + str(nme) + "(" + str(ss) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', Threshold: "+str(trshld*100)+" (" + str(ss) + "/" + len(df1.index) + ")", id + '_' + str(nme))
             elif (st == "40p"):
                 #bplot(df,id,nme)
                 print(">>>>>> EQUAL TO 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, 'Farm ' + str(nme) + "(" + str(ss) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', Threshold: "+str(trshld*100)+" (" + str(ss) + "/" + len(df1.index) + ")", id + '_' + str(nme))
             elif (st == "100p"):
                 print("No image is available for farm 2")
                 continue
