@@ -223,18 +223,19 @@ def aplot(andvil,andviu,andvin,andvia,sdf,farm,name):
     fig.add_trace(go.Scatter(x=andvil.date, y=andvil.NDVI,mode='markers',name='Medium anomaly',marker = dict(color = 'rgb(235, 153, 52)',size = 15)))
     fig.add_trace(go.Scatter(x=andviu.date, y=andviu.NDVI,mode='markers',name='Severe anomaly',marker = dict(color = 'rgb(235, 52, 52)',size = 15)))
     fig.add_trace(go.Scatter(x=andvia.date, y=andvia.NDVI,mode='markers',name='Predicted data',marker = dict(color = 'rgb(0, 0, 0)',size = 10)))
-    fig.update_layout(title="Health Graph for "+farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
+    fig.update_layout(title=farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.write_image(name+".png")
     print(">>> image file saved..." + name+'.png')
     return
 
+"""
 def bplot(df,name,nme):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.date, y=df.NDVI,mode='markers',name='Halth value',marker = dict(color = 'rgb(0, 0, 0)',size = 15)))
     fig.update_layout(title="Health Graph for "+nme+" (Not assessed for abnormalities)",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.write_image(name+".png")
     return
-
+"""
 def maskS2clouds(image):
     qa = image.select('QA60')
     cloudBitMask = 1 << 10
@@ -414,12 +415,12 @@ if __name__ == '__main__':
             if (st == "l40p"):
                 print(">>>>>> LESS THAN 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', Threshold: "+str(trshld*100)+" (" + str(ss) + "/" + len(df1.index) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) ( #" + str(ss) + ")", id + '_' + str(nme))
             elif (st == "40p"):
                 #bplot(df,id,nme)
                 print(">>>>>> EQUAL TO 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', Threshold: "+str(trshld*100)+" (" + str(ss) + "/" + len(df1.index) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) ( #" + str(ss) + ")", id + '_' + str(nme))
             elif (st == "100p"):
                 print("No image is available for farm 2")
                 continue
