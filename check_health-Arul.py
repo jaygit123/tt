@@ -415,12 +415,12 @@ if __name__ == '__main__':
             if (st == "l40p"):
                 print(">>>>>> LESS THAN 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) ( #" + str(ss) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) (#" + str(ss) + ")", id + '_' + str(nme))
             elif (st == "40p"):
                 #bplot(df,id,nme)
                 print(">>>>>> EQUAL TO 40 percent")
                 andvil1,andviu1,andvin1,andvia1,sdf1 = predict(df,trshld)
-                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) ( #" + str(ss) + ")", id + '_' + str(nme))
+                aplot(andvil1,andviu1,andvin1,andvia1,sdf1, "Farm \'" + str(nme) + "\', ("+str(int(trshld*100))+"%) (#" + str(ss) + ")", id + '_' + str(nme))
             elif (st == "100p"):
                 print("No image is available for farm 2")
                 continue
