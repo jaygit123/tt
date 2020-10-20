@@ -172,7 +172,6 @@ def create_df(NDVI,EVI):
 
 def predict(df,threshold):
     X,y = create_seq(df[['NDVI','EVI']],df.NDVI,8)
-    #print(X)
     X_pred= model.predict(X)
     mae_loss = np.abs(X_pred[:,0] - y)
     
@@ -219,12 +218,11 @@ def predict(df,threshold):
 
 def aplot(andvil,andviu,andvin,andvia,sdf,farm,name):
     fig = go.Figure()
+    fig.add_trace(go.Scatter(x=sdf.date, y=sdf.NDVI,mode='lines+markers',name='Health Graph',line = dict(color="#00fc41",width=4),marker = dict(color = 'rgb(0, 252, 65)',size = 15)))
     fig.add_trace(go.Scatter(x=andvin.date, y=andvin.NDVI,mode='markers',name='Mild anomaly',marker = dict(color = 'rgb(253, 229, 52)',size = 15)))
     fig.add_trace(go.Scatter(x=andvil.date, y=andvil.NDVI,mode='markers',name='Medium anomaly',marker = dict(color = 'rgb(235, 153, 52)',size = 15)))
     fig.add_trace(go.Scatter(x=andviu.date, y=andviu.NDVI,mode='markers',name='Severe anomaly',marker = dict(color = 'rgb(235, 52, 52)',size = 15)))
     fig.add_trace(go.Scatter(x=andvia.date, y=andvia.NDVI,mode='markers',name='Predicted data',marker = dict(color = 'rgb(0, 0, 0)',size = 10)))
-    fig.add_trace(go.Scatter(x=sdf.date, y=sdf.NDVI,mode='lines',name='Health Graph',line = dict(color="#00fc41",width=4)))
-    #fig.update_layout(title="Health Graph",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.update_layout(title="Health Graph for "+farm,showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
     fig.write_image(name+".png")
     print(">>> image file saved..." + name+'.png')
@@ -234,7 +232,6 @@ def bplot(df,name,nme):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.date, y=df.NDVI,mode='markers',name='Halth value',marker = dict(color = 'rgb(0, 0, 0)',size = 15)))
     fig.update_layout(title="Health Graph for "+nme+" (Not assessed for abnormalities)",showlegend=True,font=dict(family="Courier New, monospace",size=18,color="RebeccaPurple"))
-    fig.show()
     fig.write_image(name+".png")
     return
 
