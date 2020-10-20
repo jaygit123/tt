@@ -152,9 +152,9 @@ def getBodyContent(body, mail, farms_list):
     URL_TO_INVOKE_FN = "https://ackamrxc4anoos3auilnhwzt2q.apigateway.us-ashburn-1.oci.customer-oci.com/delsub/delsub"
     body = body + "<br>NOTE: In case Satellite images for any farm is unavailable or unusable, our system \'predicts\' the health of farm using previous 8 months\' health data. " \
                     + "<br>Health anomalies are categorized as below: " \
-                    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. 'mild' - variation upto Sensitivity lower threshold chosen for the farm" \
-                    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. 'medium' - variation upto 10% of Sensitivity lower threshold chosen for the farm" \ 
-                    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. 'severe' - variation beyond 10% of Sensitivity lower threshold chosen for the farm" \
+                    + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. \'mild\' - variation upto Sensitivity lower threshold chosen for the farm" \
+                    + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. \'medium\' - variation upto 10% of Sensitivity lower threshold chosen for the farm" \ 
+                    + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. \'severe\' - variation beyond 10% of Sensitivity lower threshold chosen for the farm" \
                     + "<br>Thanks & Regards,<br>Team <a href='https://DeepVisionTech.AI'>DeepVisionTech Pvt. Ltd.</a>" \
                     + "<br><br>Click here to unsubscribe from email notifications: " \
                     + "<a href='"+URL_TO_INVOKE_FN+"?mail="+mail+"&farm=all'>All farms</a>"
